@@ -3,6 +3,8 @@ from app.configs.database import db
 from sqlalchemy.dialects.postgresql import UUID
 import uuid
 from dataclasses import dataclass
+from .food_model import Food
+from typing import List
 
 @dataclass
 class User(db.Model):
@@ -15,6 +17,7 @@ class User(db.Model):
     weight: str
     height: str
     age: str
+    foods: List[Food]
 
     __tablename__ = "users"
 
@@ -25,3 +28,4 @@ class User(db.Model):
     weight = Column(Float)
     height = Column(Float)
     age = Column(Integer)
+    foods = db.relationship('Food', backref = 'users')

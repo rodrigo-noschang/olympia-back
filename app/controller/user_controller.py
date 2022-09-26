@@ -8,6 +8,11 @@ def get_all_users():
     
     return jsonify(users)
 
+def get_user_by_id(user_id: str):
+    user = User.query.filter_by(id = user_id).first()
+
+    return jsonify(user)
+
 
 def update_user_info(user_id: str):
     try:
