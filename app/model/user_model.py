@@ -8,7 +8,7 @@ from typing import List
 
 @dataclass
 class User(db.Model):
-    infos = {'id', 'name', 'email', 'password', 'weight', 'height', 'age'}
+    infos = {'id', 'name', 'email', 'password', 'weight', 'height', 'age', 'gender'}
 
     id: str
     name: str
@@ -17,6 +17,7 @@ class User(db.Model):
     weight: str
     height: str
     age: str
+    gender: str
     foods: List[Food]
 
     __tablename__ = "users"
@@ -28,4 +29,5 @@ class User(db.Model):
     weight = Column(Float)
     height = Column(Float)
     age = Column(Integer)
-    foods = db.relationship('Food', backref = 'users')
+    gender = Column(String, nullable = False)
+    foods = db.relationship('Food', backref = 'users', cascade = 'all, delete-orphan')
