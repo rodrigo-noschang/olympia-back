@@ -2,6 +2,7 @@ from app.exc.exc import NonAuthenticated, SessionExpired
 from app.model.food_model import Food
 from flask import jsonify, request, current_app
 from sqlalchemy.exc import IntegrityError, DataError
+from sqlalchemy.orm.exc import UnmappedInstanceError
 from psycopg2.errors import ForeignKeyViolation, NotNullViolation, InvalidColumnReference, InvalidTextRepresentation
 from .token_required_controller import token_required
 
@@ -9,6 +10,19 @@ def get_all_food():
     foods = Food.query.all()
 
     return jsonify(foods)
+
+def delete_food(food_id: str):
+    try:
+        food = Food.query.get(food_id)
+
+        current_app.db.session.delete(food)
+        current_app.db.session.commit()
+
+        return jsonify(food), 201
+    
+    except UnmappedInstanceError:
+        return {"msg": "food does not exist"}, 404
+
 
 
 def add_food(user_id: str):

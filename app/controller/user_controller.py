@@ -3,6 +3,7 @@ from app.controller.token_required_controller import token_required
 from app.exc.exc import NonAuthenticated, SessionExpired
 from app.model.user_model import User
 from sqlalchemy.exc import InvalidRequestError, DataError, ProgrammingError, IntegrityError
+from sqlalchemy.orm.exc import UnmappedInstanceError
 from psycopg2.errors import UniqueViolation, NotNullViolation
 from werkzeug.security import generate_password_hash, check_password_hash
 import jwt
@@ -18,6 +19,18 @@ def get_user_by_id(user_id: str):
     user = User.query.filter_by(id = user_id).first()
 
     return jsonify(user)
+
+def delete_user(user_id: str):
+    try:
+        user = User.query.get(user_id)
+
+        current_app.db.session.delete(user)
+        current_app.db.session.commit()
+
+        return jsonify(user), 201
+    
+    except UnmappedInstanceError:
+        return {"msg": "user does not exist"}, 404
 
 
 def update_user_info(user_id: str):
@@ -98,7 +111,7 @@ def login_user():
     if password_match:
         token = jwt.encode({
             "user_id": str(user_found.id),
-            "expiration": str(datetime.utcnow() + timedelta(horus = 2))
+            "expiration": str(datetime.utcnow() + timedelta(hours = 2))
         }, environ.get('SECRET_KEY'))
 
         return jsonify({"token": token.decode('utf-8')}) 
