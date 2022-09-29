@@ -4,7 +4,7 @@ from app.exc.exc import NonAuthenticated, SessionExpired
 from app.model.user_model import User
 from sqlalchemy.exc import InvalidRequestError, DataError, ProgrammingError, IntegrityError
 from sqlalchemy.orm.exc import UnmappedInstanceError
-from psycopg2.errors import UniqueViolation, NotNullViolation
+from psycopg2.errors import UniqueViolation, NotNullViolation, InvalidTextRepresentation
 from werkzeug.security import generate_password_hash, check_password_hash
 import jwt
 from datetime import datetime, timedelta
@@ -16,9 +16,16 @@ def get_all_users():
     return jsonify(users)
 
 def get_user_by_id(user_id: str):
-    user = User.query.filter_by(id = user_id).first()
+    try:
+        user = User.query.filter_by(id = user_id).first()
 
-    return jsonify(user)
+        if not user:
+            return {"msg": "Usuário não encontrado"}, 404
+
+        return jsonify(user)
+    except DataError as err:
+        if isinstance(err.orig, InvalidTextRepresentation):
+            return {"msg": "Usuário não encontrado"}, 404
 
 def delete_user(user_id: str):
     try:
@@ -30,7 +37,7 @@ def delete_user(user_id: str):
         return jsonify(user), 201
     
     except UnmappedInstanceError:
-        return {"msg": "user does not exist"}, 404
+        return {"msg": "Usuário não encontrado"}, 404
 
 
 def update_user_info(user_id: str):
@@ -47,18 +54,18 @@ def update_user_info(user_id: str):
         return jsonify(updated_user)
 
     except InvalidRequestError:
-        return {"error": "invalid keys"}, 400
+        return {"msg": "Chave(s) inválida(s) na requisição"}, 400
     except DataError:
-        return {"error": "invalid data type"}, 400
+        return {"msg": "Tipo de dado inválido"}, 400
     except ProgrammingError:
-        return {"error": "missing keys"}, 400
+        return {"msg": "Chave(s) faltando na requisição"}, 400
     except IntegrityError as err:
         if isinstance(err.orig, UniqueViolation):
-            return {"error": "name or email already exists"}, 403
+            return {"msg": "Nome ou e-mail já cadastrados"}, 403
     except NonAuthenticated as err:
-        return {"msg": "must log in"}, 401
+        return {"msg": "Precisa estar logado"}, 401
     except SessionExpired as err:
-        return {"msg": "session expired"}, 400
+        return {"msg": "Sessão expirada"}, 400
 
 def create_user():
     try:
@@ -91,11 +98,11 @@ def create_user():
         return jsonify(new_user_created)
     except IntegrityError as err:
         if isinstance(err.orig, NotNullViolation):
-            return {"msg": "missing name, email or password"}, 400
+            return {"msg": "Faltando nome, email ou senha"}, 400
     except InvalidRequestError as err:
-        return {"msg": "invalid keys in the request"}, 400
+        return {"msg": "Chave(s) inválida(s) na requisição"}, 400
     except UniqueViolation as err:
-        return {"msg": "name or email already exists"}, 400
+        return {"msg": "Nome ou email já cadastrados"}, 400
 
 
 def login_user():
@@ -104,7 +111,7 @@ def login_user():
     user_found = User.query.filter_by(email=login_data['email']).first()
 
     if not user_found:
-        return {"msg": "invalid email or password"}, 400
+        return {"msg": "Email ou senha inválidos"}, 400
 
     password_match = check_password_hash(user_found.password, login_data['password'])
 
@@ -117,4 +124,4 @@ def login_user():
         return jsonify({"token": token.decode('utf-8')}) 
 
     else:
-        return {"msg": "invalid email or password"}, 400
+        return {"msg": "Email ou senha inválidos"}, 400

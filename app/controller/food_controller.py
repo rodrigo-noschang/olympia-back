@@ -11,6 +11,19 @@ def get_all_food():
 
     return jsonify(foods)
 
+def get_food_by_id(food_id: str):
+    try:
+        food = Food.query.filter_by(id = food_id).first()
+
+        if not food:
+            return {"msg": "Alimento não encontrado"}, 404
+
+        return jsonify(food)
+    except DataError as err:
+        if isinstance(err.orig, InvalidTextRepresentation):
+            return {"msg": "Alimento não encontrado"}, 404
+
+
 def delete_food(food_id: str):
     try:
         food = Food.query.get(food_id)
@@ -21,7 +34,7 @@ def delete_food(food_id: str):
         return jsonify(food), 201
     
     except UnmappedInstanceError:
-        return {"msg": "food does not exist"}, 404
+        return {"msg": "Alimento não encontrado"}, 404
 
 
 
@@ -44,20 +57,20 @@ def add_food(user_id: str):
 
     except IntegrityError as err:
         if isinstance(err.orig, ForeignKeyViolation):
-            return {"msg": "user does not exist"}, 400
+            return {"msg": "Usuário não encontrado"}, 400
         if isinstance(err.orig, NotNullViolation):
-            return {"msg": "missing keys"}, 400
+            return {"msg": "Chave(s) faltando na requisição"}, 400
         
     except InvalidColumnReference as err:
-        return {"msg": "invalid keys in the request"}, 400
+        return {"msg": "Chave(s) inválida(s) na requisição"}, 400
     except DataError as err:
         if isinstance(err.orig, InvalidTextRepresentation):
-            return {"msg": "invalid data type in the request"}, 400
+            return {"msg": "Tipo de dado inválido na requisição"}, 400
 
     except NonAuthenticated as err:
-        return {"msg": "must log in"}, 401
+        return {"msg": "Precisa estar logado"}, 401
     except SessionExpired as err:
-        return {"msg": "session expired"}, 400
+        return {"msg": "Sessão expirada"}, 400
 
 
 def update_food(food_id: str):
@@ -76,11 +89,11 @@ def update_food(food_id: str):
         return jsonify(updated_db_food)
 
     except InvalidColumnReference as err:
-        return {"msg": "invalid keys in the request"}, 400
+        return {"msg": "Chave(s) inválida(s) na requisição"}, 400
     except DataError as err:
         if isinstance(err.orig, InvalidTextRepresentation):
-            return {"msg": "invalid data type in the request or food does not exists"}, 400
+            return {"msg": "Tipo de dado inválido na requisição ou alimento não existe"}, 400
     except NonAuthenticated as err:
-        return {"msg": "must log in"}, 401
+        return {"msg": "Precisa estar logado"}, 401
     except SessionExpired as err:
-        return {"msg": "session expired"}, 400
+        return {"msg": "Sessão expirada"}, 400
