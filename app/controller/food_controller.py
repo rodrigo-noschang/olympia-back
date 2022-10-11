@@ -7,7 +7,7 @@ from psycopg2.errors import ForeignKeyViolation, NotNullViolation, InvalidColumn
 from .token_required_controller import token_required
 
 def get_all_food():
-    foods = Food.query.all()
+    foods = Food.query.order_by(Food.name).all()
 
     return jsonify(foods)
 

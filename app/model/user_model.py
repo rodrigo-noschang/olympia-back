@@ -30,4 +30,4 @@ class User(db.Model):
     height = Column(Float)
     age = Column(Integer)
     gender = Column(String, nullable = False)
-    foods = db.relationship('Food', backref = 'users', cascade = 'all,delete')
+    foods = db.relationship('Food', backref = 'users', cascade = 'all,delete', order_by = Food.name)
