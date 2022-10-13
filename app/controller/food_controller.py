@@ -36,6 +36,14 @@ def delete_food(food_id: str):
     except UnmappedInstanceError:
         return {"msg": "Alimento não encontrado"}, 404
 
+def delete_multiple_food(meal_number: int):
+    deletion = Food.__table__.delete().where(Food.meal == meal_number)
+    
+    current_app.db.session.execute(deletion)
+    current_app.db.session.commit()
+
+    return {}, 204
+
 
 
 def add_food(user_id: str):
@@ -97,3 +105,11 @@ def update_food(food_id: str):
         return {"msg": "Precisa estar logado"}, 401
     except SessionExpired as err:
         return {"msg": "Sessão expirada"}, 400
+
+def update_multiple_foods (meal_number: int):
+    updated_data = request.json
+
+    Food.query.filter_by(meal=meal_number).update(updated_data)
+    current_app.db.session.commit()
+
+    return {}, 204
