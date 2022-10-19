@@ -13,5 +13,3 @@ def create_app():
     routes.init_app(app)
 
     return app
-
-app = create_app()
