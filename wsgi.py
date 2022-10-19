@@ -1,1 +1,4 @@
-from app import deploy_app as application
+from app import app
+
+if __name__ == 'main':
+    app.run()

@@ -14,4 +14,4 @@ def create_app():
 
     return app
 
-deploy_app = create_app()
+app = create_app()
