@@ -1,3 +1,4 @@
+from venv import create
 from flask import Flask
 from app.configs import env_configs, database, migrations
 from app import routes
@@ -12,3 +13,5 @@ def create_app():
     routes.init_app(app)
 
     return app
+
+app = create_app()
