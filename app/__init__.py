@@ -13,3 +13,5 @@ def create_app():
     routes.init_app(app)
 
     return app
+
+deploy_app = create_app()
