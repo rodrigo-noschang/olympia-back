@@ -1,4 +1,3 @@
-from venv import create
 from flask import Flask
 from app.configs import env_configs, database, migrations
 from app import routes
