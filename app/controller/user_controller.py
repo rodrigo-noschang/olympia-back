@@ -121,7 +121,7 @@ def login_user():
             "expiration": str(datetime.utcnow() + timedelta(hours = 2))
         }, environ.get('SECRET_KEY'))
 
-        return jsonify({"token": token.decode('utf-8')}) 
+        return jsonify({"token": token}) 
 
     else:
         return {"msg": "Email ou senha inválidos"}, 400
